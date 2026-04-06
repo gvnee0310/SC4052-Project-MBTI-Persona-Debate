@@ -1,0 +1,17 @@
+[
+  { "id": 1, "category": "Technology", "title": "Should AI replace teachers in schools?", "heat": "hot" },
+  { "id": 2, "category": "Society", "title": "Is social media doing more harm than good?", "heat": "hot" },
+  { "id": 3, "category": "Work", "title": "Should remote work be the default?", "heat": "warm" },
+  { "id": 4, "category": "Ethics", "title": "Is it ethical to eat meat?", "heat": "warm" },
+  { "id": 5, "category": "Technology", "title": "Should we colonize Mars or fix Earth first?", "heat": "hot" },
+  { "id": 6, "category": "Education", "title": "Are university degrees still worth it?", "heat": "warm" },
+  { "id": 7, "category": "Finance", "title": "Should cryptocurrency be regulated?", "heat": "hot" },
+  { "id": 8, "category": "Society", "title": "Is cancel culture justified?", "heat": "hot" },
+  { "id": 9, "category": "Work", "title": "Should the 4-day work week be standard?", "heat": "warm" },
+  { "id": 10, "category": "Ethics", "title": "Should AI-generated art be copyrighted?", "heat": "hot" },
+  { "id": 11, "category": "Finance", "title": "Should billionaires exist?",  "heat": "hot" },
+  { "id": 12, "category": "Technology", "title": "Should children under 13 be banned from smartphones?", "heat": "warm" },
+  { "id": 13, "category": "Education", "title": "Should coding be a mandatory school subject?", "heat": "warm" },
+  { "id": 14, "category": "Society", "title": "Is meritocracy a myth?", "heat": "hot" },
+  { "id": 15, "category": "Ethics", "title": "Should we grant legal personhood to advanced AI?", "heat": "hot" }
+]
