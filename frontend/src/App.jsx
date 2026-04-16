@@ -51,7 +51,10 @@ RULES:
 - Respond directly to what others have said. Reference their points by name.
 - Show your personality through your communication style, word choice, and reasoning approach.
 - Never mention that you are an AI. You are roleplaying as a person with this MBTI type.
-- Do not use bullet points or numbered lists. Speak naturally in flowing prose.`;
+- Do not use bullet points or numbered lists. Speak naturally in flowing prose.
+- NEVER start your response with your own name, "User:", or anyone else's name followed by a colon. Just speak directly.
+- Only output YOUR OWN response. Do not write responses for other participants.
+- NEVER use asterisks, markdown formatting, or special characters. Write in plain text only.`;
 }
 
 // ── Topic Service ────────────────────────────────────────────
@@ -70,13 +73,48 @@ const PRESET_TOPICS = [
 
 // ── Orchestration Service ────────────────────────────────────
 function buildConversationMessages(systemPrompt, topic, history, agents) {
-  const agentNames = agents.map(a => `${a.name} (${a.mbti})`).join(", ");
+  const agentNames = agents.map(a => `${a.name} (${a.mbti})`).join(", ") + ", and a human User";
+  
+  // Only send last 6 messages
+  const recentHistory = history.slice(-6);
+  
+  // Only include user message if it was within last 3 messages
+  const historyForPrompt = recentHistory.map((m, i) => {
+    if (m.isUser) {
+      const msgAge = recentHistory.length - i;
+      if (msgAge > 3) return null; // drop old user messages
+      return `USER (human participant): ${m.text}`;
+    }
+    return `${m.sender}: ${m.text}`;
+  }).filter(Boolean);
+
+  const olderCount = history.length - recentHistory.length;
+  
+  const historyText = history.length === 0
+    ? "[No messages yet. You are opening the debate. State your position clearly.]"
+    : (olderCount > 0 ? `[${olderCount} earlier messages omitted]\n\n` : "")
+      + historyForPrompt.join("\n\n");
+
+  const phase = history.length <= 3 ? "OPENING — State your position clearly and boldly."
+    : history.length <= 8 ? "MIDDLE — Introduce new angles. Build on or challenge recent points. Move the discussion into new territory."
+    : "CLOSING — Wrap up. Find common ground where natural, or firmly disagree. Give your final position.";
+
   const msgs = [
-    { role: "user", content: `DEBATE TOPIC: "${topic}"\nPARTICIPANTS: ${agentNames}\n\nThe debate is starting. Here is the conversation so far:\n\n${
-      history.length === 0
-        ? "[No messages yet. You are opening the debate. State your position clearly.]"
-        : history.map(m => `${m.sender}: ${m.text}`).join("\n\n")
-    }\n\nNow it is YOUR turn. Respond in character. Remember: 2-4 sentences, natural prose, respond to what others said.` }
+    { role: "user", content: `DEBATE TOPIC: "${topic}"
+PARTICIPANTS: ${agentNames}
+
+Recent conversation:
+
+${historyText}
+
+DEBATE PHASE: ${phase}
+
+YOUR TURN. Rules:
+- 2-4 sentences, natural prose, plain text only
+- Respond to the last 1-2 speakers only
+- If a User message appears above AND was recent, acknowledge it ONCE briefly then move on
+- Never repeat a point already made by anyone — always advance with something NEW
+- In CLOSING phase, start reaching conclusions` }
   ];
   return { system: systemPrompt, messages: msgs };
 }
@@ -124,6 +162,9 @@ async function callLLM(system, messages) {
     body: JSON.stringify({ system, messages }),
   });
   const data = await res.json();
+  if (!res.ok || data.error) {
+    throw new Error(data.error === "RATE_LIMITED" ? "RATE_LIMITED" : (data.error || "API call failed"));
+  }
   return data.text || "...";
 }
 
@@ -346,7 +387,11 @@ function DebateRoom({ config, onFinish, onBack }) {
       setCurrentTurn(nextTurn);
       if (nextTurn === 0) setRound(r => r + 1);
     } catch (e) {
-      setError("API call failed. Check your connection and try again.");
+      if (e.message === "RATE_LIMITED") {
+        setError("⏳ Daily API quota reached (20 free requests/day). This is a Google Gemini free-tier limitation. Please wait for the quota to reset or use a new API key.");
+      } else {
+        setError("API call failed. Check your connection and try again.");
+      }
     }
     setLoading(false);
   }, [currentTurn, agents, messages, topic]);

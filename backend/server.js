@@ -41,7 +41,7 @@ async function callGemini(systemPrompt, userMessage) {
     ],
     generationConfig: {
       temperature: 0.9,
-      maxOutputTokens: 1024,
+      maxOutputTokens: 2048,
     },
   };
 
@@ -54,6 +54,9 @@ async function callGemini(systemPrompt, userMessage) {
   if (!response.ok) {
     const err = await response.text();
     if (response.status === 429) {
+        throw new Error("RATE_LIMITED");
+      }
+      if (response.status === 429) {
         throw new Error("RATE_LIMITED");
       }
       if (response.status === 429) {
@@ -294,8 +297,20 @@ Respond with ONLY this JSON:
 }`
     );
 
-    const clean = raw.replace(/```json|```/g, "").trim();
-    const analysis = JSON.parse(clean);
+    // Extract JSON more robustly — find content between first { and last }
+    let clean = raw.replace(/```json|```/g, "").trim();
+    const firstBrace = clean.indexOf("{");
+    const lastBrace = clean.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      clean = clean.substring(firstBrace, lastBrace + 1);
+    }
+    let analysis;
+    try {
+      analysis = JSON.parse(clean);
+    } catch (parseErr) {
+      console.error("JSON parse failed. Raw response:", raw);
+      throw new Error("Analysis response was not valid JSON. Try running the debate longer before analyzing.");
+    }
     if (session) session.status = "analyzed";
 
     res.json({ analysis, debateStats: { messages: messages.length, agents: agents.length, rounds: session?.round || 0 } });
@@ -327,7 +342,11 @@ app.post("/api/llm/chat", async (req, res) => {
       if (error.message === "RATE_LIMITED") {
       res.status(429).json({ error: "RATE_LIMITED" });
     } else {
+      if (error.message === "RATE_LIMITED") {
+      res.status(429).json({ error: "RATE_LIMITED" });
+    } else {
       res.status(500).json({ error: error.message });
+    }
     }
     }
   }
