@@ -1,16 +1,3 @@
-// ============================================================
-// PDaaS Backend — Express.js API Server
-// PersonaDebate-as-a-Service
-// 
-// Architecture: 4 microservices exposed via RESTful API
-//   /api/personality  — MBTI profile management
-//   /api/topics       — Topic curation + external API integration
-//   /api/debate       — Debate orchestration + LLM calls
-//   /api/analysis     — Post-debate insight generation
-//
-// LLM Provider: Google Gemini 2.5 Flash (FREE tier)
-// ============================================================
-
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");

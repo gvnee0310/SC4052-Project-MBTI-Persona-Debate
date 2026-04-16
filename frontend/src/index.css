@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Playfair+Display:wght@500;700&display=swap');
 
-/* PDaaS — Enhanced Design */
 :root {
   --bg-gradient: linear-gradient(135deg, #f5f0ff 0%, #e8f4f0 50%, #fef6e8 100%);
   --card-bg: rgba(255, 255, 255, 0.75);
@@ -30,7 +29,6 @@ body {
   color: #1a1a1a;
 }
 
-/* Animated floating shapes in background */
 body::before,
 body::after {
   content: '';

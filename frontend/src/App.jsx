@@ -1,9 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 
-// ============================================================
-// SERVICE LAYER — mirrors backend microservice decomposition
-// ============================================================
-
 // ── Personality Service ──────────────────────────────────────
 const MBTI_GROUPS = {
   Analysts: { color: "#7B5EA7", types: ["INTJ", "INTP", "ENTJ", "ENTP"] },
